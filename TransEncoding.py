@@ -63,19 +63,62 @@ def simple_transfer(type, file_path, out_path=None):
 
 		return True
 
-def mix_transfer(file_path):
+def mix_transfer(file_path, mode='others'):
+	"""
+	mix_transfer 
+
+	Each line of the files will be read and try to decode with several options
+	then encode into utf-8
+
+	@Note: 
+		Input and output will use binary to transfer the file.
+
+	Args:
+		file_path ([type]): [description]
+	"""	
+	
+	if mode=='inplace':
+		outfile = file_path
+	elif mode=='others':
+		if not os.path.exists('out'):
+			os.mkdir('out')
+		outfile = os.path.join('out', os.path.basename(file_path))
+	else:
+		raise NotImplementedError
 	with open(file_path, 'rb') as f:
+
 		lines = f.readlines()
+		output_data = []
+
 		for line in lines:
+			temp_line = line
 			temp_result = chardet.detect(line)
-
-			if temp_result['encoding']!='ascii':
-				if temp_result['confidence']>0.95:
+			# If the line is pure code.
+			if temp_result['confidence']>0.98:
+				# Check if the line has already had encoding type.
+				if temp_result['encoding']!='ascii':
 					try:
-						temp_line = line.decode(temp_result['encoding'])
+						temp_line = line.decode(temp_result['encoding']).encode('utf-8')
 					except:
-						pass
+						temp_line = repair_encoding(line)
+				else:
+					# In word repair
+					pass
+			output_data.append(temp_line)
+		
+		with open(outfile, 'wb') as f_out:
+			f_out.write(b''.join(output_data))
+def repair_encoding(raw_line):
+	# Encoding type try:
 
+	try:
+		temp = raw_line.decode('utf-8')
+		temp = temp.encode('gbk')
+		temp = temp.decode('utf-8')
+		return temp
+	except:
+		return raw_line
+	
 def _transfer(file_path):
 	with open(file_path, 'rb') as f:
 		data = f.read()
