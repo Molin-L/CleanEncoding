@@ -72,7 +72,9 @@ def mix_transfer(file_path, mode='others'):
 
 	@Note: 
 		Input and output will use binary to transfer the file.
-
+	@Todo:
+		1. Finish mix_transfer processing.
+		2. Test all function
 	Args:
 		file_path ([type]): [description]
 	"""	
